@@ -52,7 +52,9 @@ module adc_intf(
    assign read_enable = PSEL & (~PWRITE);
    assign write_enable = PSEL & PWRITE & (~PENABLE);
 
-   always @(posedge PCLKG or negedge PRESETn)
+   // use pclk because the reg_adc_sr is related to inner status
+   // this status is used to control the adc
+   always @(posedge PCLK or negedge PRESETn)
      begin
 	if (~PRESETn)
 	  reg_adc_sr_eoc <= ADC_SR_RESET[1];
@@ -62,7 +64,7 @@ module adc_intf(
 	  reg_adc_sr_eoc <= 1'b0;
 	else if (write_enable &(PADDR[11:2] == ADC_SR_OFFSET[11:2]))
 	  reg_adc_sr_eoc <= 1'b0;
-     end // always @ (posedge PCLKG or negedge PRESETn)
+     end // always @ (posedge PCLK or negedge PRESETn)
 
    always @(posedge PCLKG or negedge PRESETn)
      begin
