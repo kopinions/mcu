@@ -61,7 +61,7 @@ module mcu_sysctrl(
    wire [31:0] 			      rcccfgr1_reg;
    wire [31:0] 			      rcccr_reg;
    wire [31:0] 			      resetinfo_reg;
-  
+   
    
    
    
@@ -288,6 +288,53 @@ module mcu_sysctrl(
    assign pwrcr_reg <= {30'h0, pwrcr_bits, 1'b0};
    assign PDDS_REG = pwrcr_bits;
    
+   reg   [31:0] rdata;
+   always @ ( * ) begin
+      rdata = 32'h0;
+      case (haddr_reg[11:2]) 
+	MCU_REMAP_OFFSET[11:2]: begin
+	   rdata = remap_reg;
+	end
+	MCU_PMUENABLE_OFFSET[11:2]: begin
+	   rdata = pmuenable_reg;
+	end
+	MCU_LOCKUPRESET_OFFSET[11:2]: begin
+	   rdata = lockupreset_reg;
+	end
+	MCU_RESETINFO_OFFSET[11:2]: begin
+	   rdata = resetinfo_reg;
+	end
+	MCU_RCCCR_OFFSET[11:2]: begin
+	   rdata = rcccr_reg;
+	end
+	MCU_RCCCFGR_OFFSET[11:2]: begin
+	   rdata = RCCCFGR_REG;
+	end
+	MCU_RCCCFGR1_OFFSET[11:2]: begin
+	   rdata = rcccfgr1_reg;
+	end
+	MCU_PWRCR_OFFSET[11:2]: begin
+	   rdata = pwrcr_reg;
+	end
+      endcase
+   end // always @ ( * )
+
+   always @ ( /*AUTOSENSE*/ ) begin
+      if (~PORESETn) begin
+	 HRDATA <= 32'h0;
+      end
+      else if (~hwrite_reg && HREADY)  begin
+	 HRDATA <= rdata;
+      end
+   end
+
+   assign HRESP = 1'b0;
    
-   // read register
+   assign PLL_CTRL = {
+		      rcccfgr1_reg, 
+		      rcccr_reg[24], 
+		      rcccr_reg[0]
+		      };
+   
+   
 endmodule // mcu_sysctrl
