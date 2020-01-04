@@ -234,7 +234,7 @@ module mcu_sysctrl(
    always @ ( posedge HCLK or negedge PORESETn ) begin
       if (~PORESETn) begin
 	 rcccfgr_bits <= {MCU_RCC_CFGR_RESET[26:24], MCU_RCC_CFGR_RESET[10:8], MCU_RCC_CFGR_RESET[7:4], MCU_RCCCFGR_RESET[2], MCU_RCCCFGR_RESET[0]};
-      end // if (~PORESETn)
+      end
       else if (haddr_reg[11:2] == MCU_RCCCFGR_OFFSET[11:2])  begin
 	 if (we[3]) begin
 	    rcccfgr_bits[11:9] = HWDATA[26:24];
@@ -251,7 +251,24 @@ module mcu_sysctrl(
    end // always @ ( posedge HCLK or negedge PORESETn )
 
    assign RCCCFGR_REG = {5'h0, rcccfgr_bits[11:9], 13'h0, rcccfgr_bits[8:6], rcccfgr_bits[5:2], 1'b0, rcccfgr_bits[1], 1'b0, rcccfgr_bits[0]};
-   
+
    // RCC_CFGR1
+   reg [15:0]  rcccfgr1_bits;
+   always @ ( posedge HCLK or negedge PORESETn ) begin
+      if (~PORESETn) begin
+	 rcccfgr1_bits <= {MCU_RCC_CFGR1_RESET[15:0]};
+      end
+      else if (haddr_reg[11:2] == MCU_RCCCFGR1_OFFSET[11:2])  begin
+	 if (we[1]) begin
+	    rcccfgr_bits[15:8] = HWDATA[15:8];
+	 end
+	 if (we[0]) begin
+	    rcccfgr_bits[7:0] = HWDATA[7:0];
+	 end
+      end
+   end // always @ ( posedge HCLK or negedge PORESETn )
+
+   assign rcccfgr1_reg = {16'h0, rcccfgr1_bits};
+   
    // read register
 endmodule // mcu_sysctrl
