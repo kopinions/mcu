@@ -202,7 +202,7 @@ module mcu_sysctrl(
    assign resetinfo_reg = {29'h0, resetinfo_bits};
    
    // Reset Clock Control Control register
-   reg   [2:0] rcccr_bits;
+   reg   [1:0] rcccr_bits;
    always @ (posedge HCLK or negedge PORESETn) begin
       if (~PORESETn)
 	rcccr_bits[1:0] <= {MCU_RCC_CR_RESET[24], MCU_RCC_CR_RESET[0]};
@@ -218,16 +218,16 @@ module mcu_sysctrl(
 	 
       end // else: !if(~PORESETn)
    end // always @ (posedge HCLK or negedge PORESETn)
-   
+
+   reg rcccr_lock;
    always @ (posedge HCLK or negedge PORESETn) begin
       if (~PORESETn)
-	rcccr_bits[2] <= 1'b0;
+	rcccr_lock <= 1'b0;
       else
-	rcccr_bits[2] <= PLL_LOCK;
+	rcccr_lock <= PLL_LOCK;
    end
 
-   assign rcccr_reg = {6'h0, rcccr_bits[2:1], 23'h0, rcccr_bits[0]};
-   
+   assign rcccr_reg = {6'h0, rcccr_lock, rcccr_bits[1], 23'h0, rcccr_bits[0]};
    // RCC_CFGR
    // RCC_CFGR1
    // read register
