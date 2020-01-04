@@ -57,6 +57,11 @@ module mcu_sysctrl(
    wire [31:0] 			      remap_reg;
    wire [31:0] 			      pmuenable_reg;
    wire [31:0] 			      lockupreset_reg;
+   wire [31:0] 			      pwrcr_reg;
+   wire [31:0] 			      rcccfgr1_reg;
+   wire [31:0] 			      rcccr_reg;
+   wire [31:0] 			      resetinfo_reg;
+  
    
    
    
@@ -260,15 +265,29 @@ module mcu_sysctrl(
       end
       else if (haddr_reg[11:2] == MCU_RCCCFGR1_OFFSET[11:2])  begin
 	 if (we[1]) begin
-	    rcccfgr_bits[15:8] = HWDATA[15:8];
+	    rcccfgr1_bits[15:8] = HWDATA[15:8];
 	 end
 	 if (we[0]) begin
-	    rcccfgr_bits[7:0] = HWDATA[7:0];
+	    rcccfgr1_bits[7:0] = HWDATA[7:0];
 	 end
       end
    end // always @ ( posedge HCLK or negedge PORESETn )
 
    assign rcccfgr1_reg = {16'h0, rcccfgr1_bits};
+
+   reg   [1] pwrcr_bits;
+   always @ ( posedge HCLK or negedge PORESETn ) begin
+      if (~PORESETn) begin
+	 pwrcr_bits <= {MCU_PWR_CR_RESET[1]};
+      end
+      else if (haddr_reg[11:2] == MCU_PWR_CR_OFFSET[11:2] && we[0])  begin
+	 pwrcr_bits <= HWDATA[1];
+      end
+   end
+
+   assign pwrcr_reg <= {30'h0, pwrcr_bits, 1'b0};
+   assign PDDS_REG = pwrcr_bits;
+   
    
    // read register
 endmodule // mcu_sysctrl
