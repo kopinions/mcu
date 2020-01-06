@@ -12,7 +12,7 @@ module adc_intf(
 		output wire 	   PSLVERR,
 
 		input wire 	   ADC_PWON,
-		input wire 	   ADC_RDY
+		input wire 	   ADC_RDY,
 		input wire [11:0]  ADC_B,
 		output wire 	   ADC_CTRL,
 		output wire 	   ADC_INT);
@@ -71,7 +71,7 @@ module adc_intf(
 	if (~PRESETn)
 	  reg_adc_cr1_eocie <= ADC_CR1_RESET[5];
 	else if (write_enable & (PADDR[11:2] == ADC_CR1_OFFSET[11:2]))
-	  reg4_adc_cr1_eocie <= PWDATA[5];
+	  reg_adc_cr1_eocie <= PWDATA[5];
      end
 
    always @(posedge PCLKG or negedge PRESETn)
@@ -89,7 +89,7 @@ module adc_intf(
 	else if (current_state == S_CONV | current_state == S_CONV_DONE) begin
 	   reg_adc_cr2_swstart <= 1'b0;
 	end
-     end
+     end // always @ (posedge PCLKG or negedge PRESETn)
 
    always @(posedge PCLKG or negedge PRESETn)
      begin
@@ -122,14 +122,15 @@ module adc_intf(
 	    begin
 	       rdata = 32'h0;
 	    end
-	end // always @ *
+	endcase // case (PADDR[11:2])
+     end // always @ *
 
    always @(posedge PCLKG or negedge PRESETn)
      begin
 	if (~PRESETn)
 	  reg_prdata <= 32'h0;
 	else
-	  reg_prdata <= read_enable? rdata: 32'h0;	
+	  reg_prdata <= read_enable ? rdata: 32'h0;	
      end
 
    always @* 
@@ -162,14 +163,15 @@ module adc_intf(
 	    next_state = S_NORMAL;
 	  default:
 	    next_state = S_PWDN;
-	end // always @ *
+	endcase // case (current_state)
+     end // always @ *
 
 
    always @(posedge PCLKG or negedge PRESETn)
      begin
 	if (~PRESETn)
 	  current_state <= S_IDLE;
-	else 
+	else
 	  current_state <= next_state;
      end
    
@@ -192,9 +194,9 @@ module adc_intf(
      begin
 	if (~PRESETn)
 	  adc_int <= 1'b0;
-	else if (~reg_adc_cr1_encie)
+	else if (~reg_adc_cr1_eocie)
 	  adc_int <= 1'b0;
-	else if ((reg_adc_cr1_encie) & (current_state == S_CONV_DONE))
+	else if ((reg_adc_cr1_eocie) & (current_state == S_CONV_DONE))
 	  adc_int <= 1'b1;
      end
 
@@ -205,9 +207,9 @@ module adc_intf(
 	if (~PRESETn)
 	  adc_opm <= 2'b00;
 	
-	else 
+	else
 	  adc_opm <= (current_state == S_IDLE) | (current_state == S_PWDN) ? 2'b00: 2'b11;
      end
 
    assign ADC_CTRL = {adc_opm, reg_adc_cr2_cal};
-endmodule
+endmodule // adc_intf

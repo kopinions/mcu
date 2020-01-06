@@ -24,7 +24,7 @@ module mcu_sysctrl(
 		   output wire 	      SLEEPHOLDACKn,
 
 		   input wire 	      PLL_LOCK,
-		   output [18:0]      wire PLL_CTRL,
+		   output wire [18:0] PLL_CTRL,
 
 		   output wire [31:0] RCCCFGR_REG,
 		   output wire 	      PDDS_REG,
@@ -39,10 +39,10 @@ module mcu_sysctrl(
 		   output wire 	      PMUENABLE,
 		   output wire 	      LOCKUPRESET);
 
-`include mcu_sysctrl_const_pkg.v
+`include "mcu_sysctrl_const_pkg.v"
 
-   reg 				      stopreq_sync;
-   reg 				      stbyreq_sync;
+   wire 				      stopreq_sync;
+   wire 				      stbyreq_sync;
 
    reg 				      ahb_trans_reg;
    reg [12:0] 			      haddr_reg;
@@ -71,7 +71,7 @@ module mcu_sysctrl(
 				.async_i(STOPREQ),
 				.sync_o(stopreq_sync));
 
-   cdc_capt_sync u_sync_stopreq(
+   cdc_capt_sync u_sync_stbyreq(
 				.clk(FCLK),
 				.nreset(PORESETn),
 				.async_i(STBYREQ),
@@ -171,7 +171,7 @@ module mcu_sysctrl(
    end
 
    assign pmuenable_reg = {31'h0, pmuenable_bits};
-   assign PMUENABLE = pmuenable[0];
+   assign PMUENABLE = pmuenable_reg[0];
 
    // lockupreset
    reg lockupreset_bits;   
@@ -210,11 +210,11 @@ module mcu_sysctrl(
    reg   [1:0] rcccr_bits;
    always @ (posedge HCLK or negedge PORESETn) begin
       if (~PORESETn)
-	rcccr_bits[1:0] <= {MCU_RCC_CR_RESET[24], MCU_RCC_CR_RESET[0]};
+	rcccr_bits[1:0] <= {MCU_RCCCR_RESET[24], MCU_RCCCR_RESET[0]};
       else begin
-	 if (haddr_reg[11:2]==MCU_RCC_CR_OFFSET[11:2]) begin
+	 if (haddr_reg[11:2]==MCU_RCCCR_OFFSET[11:2]) begin
 	    if (we[3]) begin
-	       rccrr_bits[1] <= HWDATA[24];
+	       rcccr_bits[1] <= HWDATA[24];
 	    end
 	    if (we[0]) begin
 	       rcccr_bits[0] <= HWDATA[0];
@@ -238,7 +238,7 @@ module mcu_sysctrl(
    reg [11:0]  rcccfgr_bits;
    always @ ( posedge HCLK or negedge PORESETn ) begin
       if (~PORESETn) begin
-	 rcccfgr_bits <= {MCU_RCC_CFGR_RESET[26:24], MCU_RCC_CFGR_RESET[10:8], MCU_RCC_CFGR_RESET[7:4], MCU_RCCCFGR_RESET[2], MCU_RCCCFGR_RESET[0]};
+	 rcccfgr_bits <= {MCU_RCCCFGR_RESET[26:24], MCU_RCCCFGR_RESET[10:8], MCU_RCCCFGR_RESET[7:4], MCU_RCCCFGR_RESET[2], MCU_RCCCFGR_RESET[0]};
       end
       else if (haddr_reg[11:2] == MCU_RCCCFGR_OFFSET[11:2])  begin
 	 if (we[3]) begin
@@ -261,7 +261,7 @@ module mcu_sysctrl(
    reg [15:0]  rcccfgr1_bits;
    always @ ( posedge HCLK or negedge PORESETn ) begin
       if (~PORESETn) begin
-	 rcccfgr1_bits <= {MCU_RCC_CFGR1_RESET[15:0]};
+	 rcccfgr1_bits <= {MCU_RCCCFGR1_RESET[15:0]};
       end
       else if (haddr_reg[11:2] == MCU_RCCCFGR1_OFFSET[11:2])  begin
 	 if (we[1]) begin
@@ -275,17 +275,17 @@ module mcu_sysctrl(
 
    assign rcccfgr1_reg = {16'h0, rcccfgr1_bits};
 
-   reg   [1] pwrcr_bits;
+   reg  pwrcr_bits;
    always @ ( posedge HCLK or negedge PORESETn ) begin
       if (~PORESETn) begin
-	 pwrcr_bits <= {MCU_PWR_CR_RESET[1]};
+	 pwrcr_bits <= {MCU_PWRCR_RESET[1]};
       end
-      else if (haddr_reg[11:2] == MCU_PWR_CR_OFFSET[11:2] && we[0])  begin
+      else if (haddr_reg[11:2] == MCU_PWRCR_OFFSET[11:2] && we[0])  begin
 	 pwrcr_bits <= HWDATA[1];
       end
    end
 
-   assign pwrcr_reg <= {30'h0, pwrcr_bits, 1'b0};
+   assign pwrcr_reg = {30'h0, pwrcr_bits, 1'b0};
    assign PDDS_REG = pwrcr_bits;
    
    reg   [31:0] rdata;
@@ -316,10 +316,10 @@ module mcu_sysctrl(
 	MCU_PWRCR_OFFSET[11:2]: begin
 	   rdata = pwrcr_reg;
 	end
-      endcase
+      endcase // case (haddr_reg[11:2])
    end // always @ ( * )
 
-   always @ ( /*AUTOSENSE*/ ) begin
+   always @ ( posedge HCLK or negedge PORESETn ) begin
       if (~PORESETn) begin
 	 HRDATA <= 32'h0;
       end

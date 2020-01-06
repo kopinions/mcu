@@ -12,7 +12,6 @@ module cdc_capt_sync(
      if (!nreset) 
        begin
 	  d_sync1 <= 1'b0;
-	  sync_o <= 1'b0;
        end 
      else 
        begin

@@ -10,14 +10,14 @@ localparam MCU_LOCKUPRESET_RESET = 32'h0;
 localparam MCU_RESETINFO_OFFSET = 12'hC;
 localparam MCU_RESETINFO_RESET = 32'h0;
 
-localparam MCU_RCC_CR_OFFSET = 12'h10;
-localparam MCU_RCC_CR_RESET = 32'h0;
+localparam MCU_RCCCR_OFFSET = 12'h10;
+localparam MCU_RCCCR_RESET = 32'h0;
 
-localparam MCU_RCC_CFGR_OFFSET = 12'h14;
-localparam MCU_RCC_CFGR_RESET = 32'h0;
+localparam MCU_RCCCFGR_OFFSET = 12'h14;
+localparam MCU_RCCCFGR_RESET = 32'h0;
 
-localparam MCU_RCC_CFGR1_OFFSET = 12'h18;
-localparam MCU_RCC_CFGR1_RESET = 32'h0;
+localparam MCU_RCCCFGR1_OFFSET = 12'h18;
+localparam MCU_RCCCFGR1_RESET = 32'h0;
 
-localparam MCU_PWR_CR_OFFSET = 12'h1C;
-localparam MCU_PWR_CR_RESET = 32'h0;
+localparam MCU_PWRCR_OFFSET = 12'h1C;
+localparam MCU_PWRCR_RESET = 32'h0;
