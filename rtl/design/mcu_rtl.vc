@@ -19,7 +19,9 @@
 +incdir+${DESIGN_PATH}/defs/verilog
 
 
+${DESIGN_PATH}/system/verilog/mcu_system.v
 ${DESIGN_PATH}/system/verilog/mcu_sysctrl.v
 ${DESIGN_PATH}/system/verilog/adc_intf.v
+${DESIGN_PATH}/defs/verilog/mcu_defs.v
 
 ${DESIGN_PATH}/../model/cells/generic/cdc_capt_sync.v

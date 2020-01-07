@@ -1,0 +1,6 @@
+`define MCU_INCLUDE_CLKGATE 1'b1;
+
+`define AHB_ROM_NONE 0
+
+`define MCU_BOOT_MEM_TYPE `AHB_ROM_NONE 
+
