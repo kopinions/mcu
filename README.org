@@ -1,0 +1,17 @@
+** MCU Design
+
+*** 编译 RTL
+#+BEGIN_SRC shell
+mkdir -p build
+cd build 
+cmake ..
+make compile
+cd -
+#+END_SRC
+
+*** 一些命令
+#+BEGIN_SRC shell
+find . -name "*.v" |sed 's/^\.//g' |xargs -I{} echo "\$DESIGN_PATH{}" >> mcu_rtl.vc
+find . -name verilog |sed 's/\.//g' |xargs -I{} echo "+incdir+\$DESIGN_PATH{}" >> mcu_rtl.vc
+find . -name generic -type d |xargs -I{} find {} -name "*.v" |sed 's/^\.//g'|awk '{print "$DESIGN_PATH/.." $0}' >> design/mcu_rtl.vc
+#+END_SRC
