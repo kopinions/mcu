@@ -1,4 +1,5 @@
-`define MCU_INCLUDE_CLKGATE 1'b1;
+`define MCU_INCLUDE_CLKGATE
+`define MCU_INCLUDE_DMA
 
 `define AHB_ROM_NONE 0
 
